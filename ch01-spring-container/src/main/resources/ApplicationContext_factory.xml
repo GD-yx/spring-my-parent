@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+
+    <!--这种配置方法createA方法必须是静态的-->
+  <bean id="factory" class="factory.AFactory"
+          factory-method="createA"></bean>
+
+
+    <bean id="xxx" class="factory.AFactory"/>
+    <bean id="factory2"
+          factory-bean="xxx"
+          factory-method="createB"/>
+  <!--这种方法得到的不是MyFactoryBean这个类的实列，而是MyFactoryBean内部的方法返回的实列-->
+    <bean id="factory3" class="factory.MyFactoryBean">
+
+    </bean>
+</beans>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!--配置一个DataSource-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="url" value="jdbc:mysql://localhost:3306/demo2"/>
+        <property name="username" value="root"/>
+        <property name="password" value="root"/>
+    </bean>
+
+    <bean id="JdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--父子类配置的方法-->
+    <bean id="baseDao" abstract="true">
+        <property name="jdbcTemplate" ref="JdbcTemplate"/>
+    </bean>
+    <bean id="deptDao" class="com.dao.DeptDaoImpl" parent="baseDao">
+        <!--<property name="jdbcTemplate" ref="JdbcTemplate"/>-->
+    </bean>
+    <bean id="employeeDao" class="com.dao.EmployeeDaoImpl" parent="baseDao">
+       <!-- <property name="jdbcTemplate" ref="JdbcTemplate"/>-->
+    </bean>
+
+    <bean id="deptService" class="com.service.impl.DeptServiceImpl">
+        <property name="deptDao" ref="deptDao"/>
+        <property name="employeeDao" ref="employeeDao"/>
+    </bean>
+
+    <!--配置事务管理器,用上dataSource-->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--tx:advice的事务管理器设置:-->
+    <tx:advice id="txAdvisor" transaction-manager="txManager">
+        <tx:attributes>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="*" propagation="REQUIRED" rollback-for="com.dao.MyCheckEx"/>
+        </tx:attributes>
+
+    </tx:advice>
+
+    <aop:config>
+        <aop:pointcut id="serviceTx" expression="execution(* com.service..*(..))"/>
+        <aop:advisor advice-ref="txAdvisor" pointcut-ref="serviceTx"/>
+    </aop:config>
+</beans>

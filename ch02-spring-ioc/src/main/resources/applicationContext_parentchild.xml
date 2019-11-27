@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="myParent" class="inject.parentchild.MyParent">
+        <property name="p1" value="p1"/>
+        <property name="p2" value="p2"/>
+    </bean>
+    <bean id="childOne" class="inject.parentchild.ChildOne" parent="myParent">
+    <property name="childOne" value="childONE"/>
+    </bean>
+</beans>

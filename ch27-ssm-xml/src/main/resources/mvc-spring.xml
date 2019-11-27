@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc
+       https://www.springframework.org/schema/mvc/spring-mvc.xsd http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!--扫描controller和service层-->
+    <context:component-scan
+            base-package="com.controller,com.service"/>
+    <!--转换服务，注解解析器，校验等等-->
+    <mvc:annotation-driven conversion-service="conversionService"/>
+    <!--视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+    <!--设置日期格式-->
+    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        <property name="formatters">
+            <bean class="org.springframework.format.datetime.DateFormatter">
+                <property name="pattern" value="yyyy-MM-dd"/>
+            </bean>
+        </property>
+    </bean>
+    <!--引入外部文件-->
+    <context:property-placeholder local-override="true" location="classpath:db.properties"/>
+    <!--数据库 连接池-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="filters" value="stat"/>
+
+        <property name="maxActive" value="20"/>
+        <property name="initialSize" value="1"/>
+        <property name="maxWait" value="60000"/>
+        <property name="minIdle" value="1"/>
+
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
+
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+
+        <property name="poolPreparedStatements" value="true"/>
+        <property name="maxOpenPreparedStatements" value="20"/>
+        <property name="asyncInit" value="true"/>
+    </bean>
+    <!--会话工厂-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--连接数据库-->
+        <property name="dataSource" ref="dataSource"/>
+        <!--扫描mapper文件-->
+        <property name="mapperLocations" value="classpath:mappers/**/*Mapper.xml"/>
+        <property name="plugins">
+            <list>
+                <!--配置分页插件-->
+                <bean class="com.github.pagehelper.PageInterceptor">
+                    <property name="properties">
+                        <props>
+                            <prop key="supportMethodsArguments">true</prop>
+                            <prop key="reasonable">true</prop>
+                        </props>
+                    </property>
+
+                </bean>
+            </list>
+        </property>
+        <!--设置mybatis的配置-->
+        <property name="configuration">
+            <bean class="org.apache.ibatis.session.Configuration">
+                <property name="logImpl"
+                          value="org.apache.ibatis.logging.stdout.StdOutImpl"/>
+                <!--把下划线改成驼峰命名-->
+                <property name="mapUnderscoreToCamelCase" value="true"/>
+            </bean>
+        </property>
+    </bean>
+    <!--扫描dao包-->
+    <mybatis:scan base-package="com.dao"/>
+    <!--事务-->
+<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    <property name="dataSource" ref="dataSource"/>
+</bean>
+    <tx:annotation-driven transaction-manager="txManager"/>
+</beans>

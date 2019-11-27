@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--ref:reference的缩写,引用的意思,它的值,一般是另外一个
+   被spring管理的bean的id-->
+
+   <!--构造函数的注入形式，通过构造函数将一个实体类注入到另一个实体类中-->
+<!--<bean id="userDao" class="inject.complex.UserDaoImpl"/>
+    <bean id="userService" class="inject.complex.UserServiceImpl">
+        <constructor-arg ref="userDao"/>
+    </bean>-->
+
+    <!--setter方法（属性注入）-->
+    <bean id="userDao" class="inject.complex.UserDaoImpl"/>
+    <bean id="userService" class="inject.complex.UserServiceImpl">
+            <property name="dao" ref="userDao"/>
+    </bean>
+</beans>
